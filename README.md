@@ -29,9 +29,39 @@
 
 ## 🛠️ Tech Stack & Methodology
 
-- **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript (Single-Page App)
+- **Backend:** Golang (Standard Library: `net/http`, `archive/tar`, `compress/gzip`, `encoding/json`, `sync`, `time`)
+- **Real-Time Communication:** Server-Sent Events (SSE)
 - **Methodology:** 1000% vibe coded ✨
-- **Purpose:** Educational prototype / UI demo
+- **Purpose:** Educational prototype / functional web application
+
+---
+
+## 🚀 Running the Go Backend
+
+Make sure [Go](https://go.dev/) is installed (Go 1.22+):
+
+```bash
+# Run backend directly
+go run .
+
+# Or build the binary
+go build -o blockhost-server .
+./blockhost-server -port 8080
+```
+
+Once running, navigate to:
+- 🌐 **Web Dashboard:** [http://localhost:8080/](http://localhost:8080/)
+- 📡 **REST API:** [http://localhost:8080/api/state](http://localhost:8080/api/state)
+- ⚡ **Live SSE Stream:** [http://localhost:8080/api/events/stream](http://localhost:8080/api/events/stream)
+
+### Available Command-Line Flags
+
+| Flag | Default | Description |
+|---|---|---|
+| `-port` | `8080` | Port for the HTTP server |
+| `-data` | `./data` | Directory for JSON state, `server.properties`, and `.tar.gz` backups |
+| `-web` | `.` | Directory containing the frontend files (`index.html`, `style.css`, `app.js`) |
 
 ---
 

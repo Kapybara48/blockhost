@@ -146,6 +146,52 @@ function saveState() {
   }
 }
 
+// Go Backend Integration State
+let isBackendConnected = false;
+let eventSource = null;
+
+async function checkBackendConnection() {
+  if (window.location.protocol === 'file:') return false;
+  try {
+    const res = await fetch('/api/state');
+    if (res.ok) {
+      const serverState = await res.json();
+      state = serverState;
+      isBackendConnected = true;
+      initSSE();
+      renderAllViews();
+      updateRawConfigPreview();
+      console.log('✅ BlockHost Go Backend connected via REST & SSE');
+      return true;
+    }
+  } catch (err) {
+    console.warn('Backend not detected, falling back to local state:', err);
+  }
+  return false;
+}
+
+function initSSE() {
+  if (eventSource) eventSource.close();
+  try {
+    eventSource = new EventSource('/api/events/stream');
+    eventSource.onmessage = (event) => {
+      try {
+        const newState = JSON.parse(event.data);
+        state = newState;
+        renderAllViews();
+        updateRawConfigPreview();
+      } catch (e) {
+        console.error('Error parsing SSE event:', e);
+      }
+    };
+    eventSource.onerror = () => {
+      // Browser automatically retries SSE connection
+    };
+  } catch (e) {
+    console.warn('SSE initialization error:', e);
+  }
+}
+
 // ==========================================================================
 // 2. INITIALIZATION & NAVIGATION
 // ==========================================================================
@@ -155,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAllViews();
   startSimulationTicker();
   updateRawConfigPreview();
+  checkBackendConnection();
 });
 
 function setupNavigation() {
@@ -361,6 +408,18 @@ function activateProfile(profileId, isAutomatic = false, eventTrigger = false) {
   const target = state.profiles.find(p => p.id === profileId);
   if (!target) return;
 
+  if (isBackendConnected && !isAutomatic) {
+    fetch('/api/profiles/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId })
+    })
+      .then(res => res.json())
+      .then(p => showToast(`Profil byl úspěšně přepnut na: ${p.name}`))
+      .catch(console.error);
+    return;
+  }
+
   state.activeProfileId = profileId;
   saveState();
   renderAllViews();
@@ -409,6 +468,13 @@ function renderScheduler() {
 }
 
 function toggleSchedule(id, enabled) {
+  if (isBackendConnected) {
+    fetch(`/api/schedules/${id}/toggle`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled })
+    }).catch(console.error);
+  }
   const rule = state.schedules.find(s => s.id === id);
   if (rule) {
     rule.enabled = enabled;
@@ -419,6 +485,9 @@ function toggleSchedule(id, enabled) {
 }
 
 function deleteSchedule(id) {
+  if (isBackendConnected) {
+    fetch(`/api/schedules/${id}`, { method: 'DELETE' }).catch(console.error);
+  }
   state.schedules = state.schedules.filter(s => s.id !== id);
   saveState();
   renderScheduler();
@@ -521,6 +590,15 @@ function switchPlayerTab(tab) {
 }
 
 function kickPlayer(name) {
+  if (isBackendConnected) {
+    fetch('/api/players/kick', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    }).catch(console.error);
+    showToast(`Hráč ${name} byl vyhozen ze serveru.`);
+    return;
+  }
   const p = state.players.find(x => x.name === name);
   if (p) {
     p.online = false;
@@ -532,6 +610,15 @@ function kickPlayer(name) {
 }
 
 function banPlayerDirect(name) {
+  if (isBackendConnected) {
+    fetch('/api/players/ban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, reason: 'Zabanováno administrátorem' })
+    }).catch(console.error);
+    showToast(`Hráč ${name} byl zabanován.`, 'error');
+    return;
+  }
   kickPlayer(name);
   if (!state.banlist.find(b => b.name === name)) {
     state.banlist.push({
@@ -548,6 +635,15 @@ function banPlayerDirect(name) {
 }
 
 function unbanPlayer(name) {
+  if (isBackendConnected) {
+    fetch('/api/players/unban', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    }).catch(console.error);
+    showToast(`Hráč ${name} byl odbanován.`);
+    return;
+  }
   state.banlist = state.banlist.filter(b => b.name !== name);
   addLog('INFO', `[Server] Unbanned player ${name}`);
   saveState();
@@ -556,6 +652,15 @@ function unbanPlayer(name) {
 }
 
 function togglePlayerOp(name) {
+  if (isBackendConnected) {
+    fetch('/api/players/op', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    }).catch(console.error);
+    showToast(`Oprávnění OP pro hráče ${name} bylo upraveno.`);
+    return;
+  }
   const p = state.players.find(x => x.name === name);
   if (p) {
     p.op = !p.op;
@@ -567,6 +672,11 @@ function togglePlayerOp(name) {
 }
 
 function removeWhitelist(name) {
+  if (isBackendConnected) {
+    fetch(`/api/whitelist/${encodeURIComponent(name)}`, { method: 'DELETE' }).catch(console.error);
+    showToast(`Hráč ${name} byl odebrán z whitelistu.`);
+    return;
+  }
   state.whitelist = state.whitelist.filter(w => w.name !== name);
   addLog('INFO', `[Server] Removed ${name} from whitelist`);
   saveState();
@@ -680,6 +790,11 @@ function addLog(level, text) {
 }
 
 function clearConsole() {
+  if (isBackendConnected) {
+    fetch('/api/logs', { method: 'DELETE' }).catch(console.error);
+    showToast('Konzole byla vymazána.');
+    return;
+  }
   state.logs = [];
   renderConsoleLogs();
   showToast('Konzole byla vymazána.');
@@ -749,6 +864,11 @@ function checkActiveEvent() {
 // ==========================================================================
 function startServer() {
   if (state.serverStatus === 'online') return;
+  if (isBackendConnected) {
+    fetch('/api/server/start', { method: 'POST' }).catch(console.error);
+    showToast('Spouštím Minecraft server...');
+    return;
+  }
   state.serverStatus = 'restarting';
   renderHeaderAndMetrics();
   addLog('INFO', '[BlockHost] Starting server process...');
@@ -767,6 +887,11 @@ function startServer() {
 
 function stopServer() {
   if (state.serverStatus === 'offline') return;
+  if (isBackendConnected) {
+    fetch('/api/server/stop', { method: 'POST' }).catch(console.error);
+    showToast('Server byl bezpečně zastaven.', 'warning');
+    return;
+  }
   state.serverStatus = 'offline';
   state.metrics.cpu = 0;
   state.metrics.ramUsed = 0;
@@ -780,6 +905,11 @@ function stopServer() {
 
 function restartServer() {
   if (state.serverStatus === 'restarting') return;
+  if (isBackendConnected) {
+    fetch('/api/server/restart', { method: 'POST' }).catch(console.error);
+    showToast('Restartuji Minecraft server...');
+    return;
+  }
   state.serverStatus = 'restarting';
   renderHeaderAndMetrics();
   addLog('WARN', '[Server] Restarting Minecraft server process...');
@@ -802,6 +932,27 @@ function createBackup() {
   const progressCard = document.getElementById('backup-progress-card');
   const progressBar = document.getElementById('backup-progress-bar');
   const progressText = document.getElementById('backup-progress-text');
+
+  if (isBackendConnected) {
+    if (progressCard) progressCard.style.display = 'block';
+    if (progressBar) progressBar.style.width = '60%';
+    if (progressText) progressText.textContent = '60%';
+    fetch('/api/backups', { method: 'POST' })
+      .then(res => res.json())
+      .then(bk => {
+        if (progressBar) progressBar.style.width = '100%';
+        if (progressText) progressText.textContent = '100%';
+        setTimeout(() => {
+          if (progressCard) progressCard.style.display = 'none';
+          showToast(`Záloha "${bk.name}" byla úspěšně vytvořena!`);
+        }, 300);
+      })
+      .catch(err => {
+        if (progressCard) progressCard.style.display = 'none';
+        showToast('Chyba při zálohování: ' + err.message, 'error');
+      });
+    return;
+  }
 
   progressCard.style.display = 'block';
   let percent = 0;
@@ -852,8 +1003,17 @@ function promptRestoreBackup(id) {
 function executeRestoreBackup() {
   closeModal('modal-restore-backup');
   if (!pendingRestoreId) return;
-  const bk = state.backups.find(b => b.id === pendingRestoreId);
+  const bkId = pendingRestoreId;
+  const bk = state.backups.find(b => b.id === bkId);
   pendingRestoreId = null;
+
+  if (isBackendConnected) {
+    showToast(`Obnovuji data ze zálohy...`);
+    fetch(`/api/backups/${bkId}/restore`, { method: 'POST' })
+      .then(() => showToast('Server byl obnoven ze zálohy!'))
+      .catch(console.error);
+    return;
+  }
 
   if (bk) {
     showToast(`Obnovuji data ze zálohy ${bk.name}...`);
@@ -865,6 +1025,12 @@ function executeRestoreBackup() {
 function downloadBackup(id) {
   const bk = state.backups.find(b => b.id === id);
   if (!bk) return;
+
+  if (isBackendConnected) {
+    window.location.href = `/api/backups/${id}/download`;
+    showToast(`Stahování archivu ${bk.name}.tar.gz zahájeno.`);
+    return;
+  }
 
   const dummyContent = `BlockHost Minecraft Backup Archive\nName: ${bk.name}\nDate: ${bk.date}\nSize: ${bk.size}\nStatus: Verified\n`;
   const blob = new Blob([dummyContent], { type: 'text/plain' });
@@ -880,6 +1046,11 @@ function downloadBackup(id) {
 }
 
 function deleteBackup(id) {
+  if (isBackendConnected) {
+    fetch(`/api/backups/${id}`, { method: 'DELETE' }).catch(console.error);
+    showToast('Záloha byla odstraněna.');
+    return;
+  }
   state.backups = state.backups.filter(b => b.id !== id);
   saveState();
   renderBackups();
@@ -892,6 +1063,15 @@ function deleteBackup(id) {
 function sendConsoleCommand(cmdString) {
   if (!cmdString || !cmdString.trim()) return;
   cmdString = cmdString.trim();
+
+  if (isBackendConnected) {
+    fetch('/api/console', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: cmdString })
+    }).catch(console.error);
+    return;
+  }
 
   addLog('INFO', `> ${cmdString}`);
 
@@ -1044,6 +1224,9 @@ function startSimulationTicker() {
       checkActiveEvent();
     }
 
+    // If backend is connected, CPU/RAM/TPS/uptime are driven by the Go server via SSE
+    if (isBackendConnected) return;
+
     // 2. Metrics simulation if server is online
     if (state.serverStatus === 'online') {
       state.uptimeSeconds += 1;
@@ -1089,6 +1272,11 @@ function setupEventListeners() {
 
   // End active event button
   document.getElementById('btn-end-event').addEventListener('click', () => {
+    if (isBackendConnected) {
+      fetch('/api/events/end', { method: 'POST' }).catch(console.error);
+      showToast('Herní event byl předčasně ukončen.', 'warning');
+      return;
+    }
     if (state.activeEvent) {
       const orig = state.activeEvent.originalProfileId;
       state.activeEvent = null;
@@ -1108,6 +1296,14 @@ function setupEventListeners() {
     state.config.port = parseInt(document.getElementById('cfg-port').value, 10) || 25565;
     state.config.pvp = document.getElementById('cfg-pvp').checked;
     state.config.whitelist = document.getElementById('cfg-whitelist').checked;
+
+    if (isBackendConnected) {
+      fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state.config)
+      }).catch(console.error);
+    }
 
     saveState();
     updateRawConfigPreview();
@@ -1157,7 +1353,15 @@ function setupEventListeners() {
     }
 
     const id = `custom-${Date.now()}`;
-    state.profiles.push({ id, name, description: desc || 'Uživatelský profil', ram, vcpu, price });
+    const newProf = { id, name, description: desc || 'Uživatelský profil', ram, vcpu, price };
+    if (isBackendConnected) {
+      fetch('/api/profiles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProf)
+      }).catch(console.error);
+    }
+    state.profiles.push(newProf);
     saveState();
     closeModal('modal-create-profile');
     renderProfiles();
@@ -1169,6 +1373,17 @@ function setupEventListeners() {
     const name = document.getElementById('event-input-name').value.trim() || 'Komunitní Turnaj';
     const profileId = document.getElementById('event-select-profile').value;
     const durationMins = parseInt(document.getElementById('event-duration').value, 10) || 60;
+
+    if (isBackendConnected) {
+      fetch('/api/events/launch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, profileId, durationMins })
+      }).catch(console.error);
+      closeModal('modal-event');
+      showToast(`Herní event "${name}" byl úspěšně spuštěn!`);
+      return;
+    }
 
     const endsAt = Date.now() + (durationMins * 60 * 1000);
     const originalProfileId = state.activeProfileId;
@@ -1201,15 +1416,24 @@ function setupEventListeners() {
       return;
     }
 
-    state.schedules.push({
+    const newSch = {
       id: `sch-${Date.now()}`,
       name,
       days: checkedDays,
       time,
       targetProfileId,
       enabled: true
-    });
+    };
 
+    if (isBackendConnected) {
+      fetch('/api/schedules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newSch)
+      }).catch(console.error);
+    }
+
+    state.schedules.push(newSch);
     saveState();
     closeModal('modal-add-schedule');
     renderScheduler();
@@ -1232,6 +1456,37 @@ function setupEventListeners() {
 
     if (!nick) {
       alert('Zadejte herní přezdívku hráče.');
+      return;
+    }
+
+    if (isBackendConnected) {
+      if (action === 'whitelist') {
+        fetch('/api/whitelist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nick })
+        }).catch(console.error);
+        showToast(`Hráč ${nick} byl přidán na whitelist.`);
+      } else if (action === 'ban') {
+        fetch('/api/players/ban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nick, reason: reason || 'Zabanováno administrátorem' })
+        }).catch(console.error);
+        showToast(`Hráč ${nick} byl zabanován.`, 'error');
+      } else if (action === 'simulate_join') {
+        fetch('/api/players/join', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nick })
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Server musí být online pro připojení hráče.');
+            showToast(`Hráč ${nick} se připojil na server.`);
+          })
+          .catch(err => alert(err.message));
+      }
+      closeModal('modal-add-player');
       return;
     }
 

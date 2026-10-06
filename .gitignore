@@ -1,0 +1,6 @@
+# Binaries
+blockhost-server
+
+# Runtime data and backups
+data/
+*.tar.gz
