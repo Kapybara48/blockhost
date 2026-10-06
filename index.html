@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlockHost – Správa Minecraft Serverů</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>BlockHost</h1>
+        <span>Minecraft Server Manager</span>
+      </div>
+    </div>
+
+    <!-- Active Server Card -->
+    <div class="server-selector-card">
+      <div class="server-avatar">MC</div>
+      <div class="server-info-mini">
+        <div class="name" id="sidebar-server-name">BlockHost SMP</div>
+        <div class="ip">mc.blockhost.cz:25565</div>
+      </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <button class="nav-btn active" data-view="dashboard">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Dashboard
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" data-view="profiles">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+          Výkonové profily
+          <span class="nav-badge" id="nav-active-profile-badge">Standard</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" data-view="scheduler">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          Plánovač & Eventy
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" data-view="players">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          Správa hráčů
+          <span class="nav-badge" id="nav-players-count">4</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" data-view="config">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Konfigurace serveru
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" data-view="backups">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+          Zálohy a obnova
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-btn" data-view="console">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+          Webová konzole
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div><strong>BlockHost v1.0</strong></div>
+      <div>Autor: Daniel Krejčí</div>
+      <a href="Krejčí_Daniel.md" target="_blank">📄 Dokumentace projektu (.md)</a>
+    </div>
+  </aside>
+
+  <!-- ==================== MAIN CONTENT WRAPPER ==================== -->
+  <div class="main-wrapper">
+
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <div class="status-indicator online" id="server-status-pill">
+          <span class="status-dot"></span>
+          <span id="server-status-text">ONLINE</span>
+        </div>
+
+        <div class="header-meta">
+          <span>Verze: <strong id="header-version">Paper 1.20.4</strong></span>
+          <span>Aktivní profil: <strong id="header-profile">Standard (6 GB)</strong></span>
+          <span>Uptime: <strong id="header-uptime">00:00:00</strong></span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btn-start" title="Spustit server">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          Spustit
+        </button>
+        <button class="btn btn-warning" id="btn-restart" title="Restartovat server">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          Restartovat
+        </button>
+        <button class="btn btn-danger" id="btn-stop" title="Zastavit server">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16"></rect></svg>
+          Zastavit
+        </button>
+      </div>
+    </header>
+
+    <!-- Event Banner (Shown when temporary event profile is active) -->
+    <div class="event-alert-banner" id="event-banner" style="display: none;">
+      <div class="event-banner-content">
+        <span class="event-badge">Aktivní Herní Event</span>
+        <span id="event-banner-text"><strong>Turnaj BedWars:</strong> Dočasný profil Ultra aktivní (16 GB RAM).</span>
+        <span>Zbývá: <strong id="event-timer">00:00</strong></span>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btn-end-event">Ukončit event nyní</button>
+    </div>
+
+    <!-- Main Container Views -->
+    <main class="content-area">
+
+      <!-- ==================== VIEW 1: DASHBOARD ==================== -->
+      <section class="view-section active" id="view-dashboard">
+        <div class="section-header">
+          <div>
+            <h2>📊 Přehled serveru</h2>
+            <div class="section-subtitle">Real-time telemetrie a rychlé ovládání herního serveru</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="btn-quick-refresh">Obnovit data</button>
+        </div>
+
+        <!-- 4 Key Stat Metric Cards -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Vytížení CPU</span>
+              <div class="stat-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-cpu">24%</div>
+            <div class="progress-track">
+              <div class="progress-bar" id="bar-cpu" style="width: 24%;"></div>
+            </div>
+            <div class="stat-footer">
+              <span id="stat-vcpu-count">2 vCPU dedikováno</span>
+              <span>Max: 100%</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Operační paměť (RAM)</span>
+              <div class="stat-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 19v-3M10 19v-3M14 19v-3M18 19v-3M6 8V5M10 8V5M14 8V5M18 8V5M3 8h18v8H3z"></path></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-ram">3.2 / 6 GB</div>
+            <div class="progress-track">
+              <div class="progress-bar" id="bar-ram" style="width: 53%;"></div>
+            </div>
+            <div class="stat-footer">
+              <span id="stat-ram-percent">53% využito</span>
+              <span id="stat-ram-profile">Profil: Standard</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Online Hráči</span>
+              <div class="stat-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-players">4 / 40</div>
+            <div class="progress-track">
+              <div class="progress-bar" id="bar-players" style="width: 10%;"></div>
+            </div>
+            <div class="stat-footer">
+              <span>Whitelist: Aktivní</span>
+              <span id="stat-players-detail">4 aktivní</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-header">
+              <span class="stat-card-title">Kvalita běhu (TPS)</span>
+              <div class="stat-card-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+              </div>
+            </div>
+            <div class="stat-value" id="stat-tps">20.0</div>
+            <div class="progress-track">
+              <div class="progress-bar" id="bar-tps" style="width: 100%;"></div>
+            </div>
+            <div class="stat-footer">
+              <span>Cíl: 20.0 TPS</span>
+              <span style="color: var(--accent-green);">Stabilní</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 Column Layout: Quick Console & Active Profile Overview -->
+        <div class="two-col-grid">
+          <div class="card">
+            <div class="card-title">
+              <span>Rychlý náhled konzole</span>
+              <button class="btn btn-secondary btn-sm" onclick="switchView('console')">Přejít do plné konzole</button>
+            </div>
+            <div class="terminal-logs" id="dashboard-mini-logs" style="height: 220px; font-size: 0.78rem;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>Aktivní profil & Náklady</span>
+              <button class="btn btn-secondary btn-sm" onclick="switchView('profiles')">Změnit profil</button>
+            </div>
+            <div style="margin-bottom: 16px;">
+              <h3 id="dash-profile-name" style="font-size: 1.3rem; margin-bottom: 4px;">Standard Community</h3>
+              <p id="dash-profile-desc" style="color: var(--text-secondary); font-size: 0.85rem;">Optimální profil pro běžné hraní s kamarády a pluginy.</p>
+            </div>
+            <div style="background: var(--bg-input); padding: 12px; border-radius: 8px; margin-bottom: 16px; border: 1px solid var(--border-color);">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
+                <span style="color: var(--text-secondary);">Aktuální sazba:</span>
+                <strong id="dash-hourly-rate" style="color: var(--accent-green);">49 Kč / hodina</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+                <span style="color: var(--text-secondary);">Odhad měsíčního provozu:</span>
+                <strong id="dash-monthly-cost">~890 Kč / měsíc</strong>
+              </div>
+            </div>
+            <button class="btn btn-secondary" style="width: 100%; justify-content: center;" onclick="openModal('modal-event')">
+              ⚡ Spustit dočasný event (Boost)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 2: PERFORMANCE PROFILES ==================== -->
+      <section class="view-section" id="view-profiles">
+        <div class="section-header">
+          <div>
+            <h2>⚡ Výkonové profily serveru</h2>
+            <div class="section-subtitle">Přepínejte konfigurace hardwaru podle potřeb komunity a šetřete náklady</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-create-profile')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Vytvořit vlastní profil
+          </button>
+        </div>
+
+        <div class="profiles-grid" id="profiles-container">
+          <!-- Dynamically populated profiles -->
+        </div>
+
+        <!-- Cost Calculation Explanation Box -->
+        <div class="card" style="margin-top: 24px;">
+          <div class="card-title">💡 Jak v BlockHost funguje dynamické řízení výkonu?</div>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
+            Tradiční hostingy účtují fixní měsíční poplatek za maximální výkon bez ohledu na to, zda na serveru někdo hraje. V BlockHost platíte pouze za skutečně aktivní profil. 
+            Můžete nastavit automatický plánovač, který přes noc server přepne do úsporného <strong>Eco</strong> profilu a odpoledne automaticky navýší kapacitu na <strong>Standard</strong> nebo <strong>Ultra</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 3: SCHEDULER & EVENTS ==================== -->
+      <section class="view-section" id="view-scheduler">
+        <div class="section-header">
+          <div>
+            <h2>⏰ Plánovač & Dočasné eventy</h2>
+            <div class="section-subtitle">Automatické přepínání profilů podle rozvrhu a správa komunitních eventů</div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-warning" onclick="openModal('modal-event')">
+              ⚡ Spustit dočasný event
+            </button>
+            <button class="btn btn-primary" onclick="openModal('modal-add-schedule')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Přidat pravidlo plánovače
+            </button>
+          </div>
+        </div>
+
+        <!-- Temporary Event Status Widget -->
+        <div class="card" style="margin-bottom: 24px;" id="event-manager-card">
+          <div class="card-title">
+            <span>🎉 Jednorázový event (Event Booster)</span>
+            <span class="status-indicator online" id="event-badge-status" style="font-size: 0.7rem;">Připraven</span>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 16px;">
+            Pořádáte turnaj, drop party nebo velký stream? Spusťte dočasný event. BlockHost okamžitě navýší RAM a vCPU a po vypršení zadaného času se server automaticky vrátí k původnímu profilu bez rizika přečerpání rozpočtu.
+          </p>
+          <div id="event-active-details" style="display: none; background: var(--bg-input); padding: 16px; border-radius: 8px; border: 1px solid var(--accent-purple);">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 id="event-active-name" style="color: var(--accent-purple); font-size: 1.1rem;">Název eventu</h4>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);" id="event-active-profile">Profil: Ultra (16 GB)</div>
+              </div>
+              <div style="text-align: right;">
+                <div style="font-size: 1.4rem; font-weight: 700; color: #facc15;" id="event-active-time-left">01:59:40</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">zbývající čas</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Schedule Rules Table -->
+        <div class="card">
+          <div class="card-title">Pravidla automatického časovače</div>
+          <div class="schedule-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Název pravidla</th>
+                  <th>Dny v týdnu</th>
+                  <th>Čas aktivace</th>
+                  <th>Cílový profil</th>
+                  <th>Stav</th>
+                  <th style="text-align: right;">Akce</th>
+                </tr>
+              </thead>
+              <tbody id="schedule-table-body">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 4: PLAYERS ==================== -->
+      <section class="view-section" id="view-players">
+        <div class="section-header">
+          <div>
+            <h2>👥 Správa hráčů</h2>
+            <div class="section-subtitle">Přehled připojených uživatelů, správa přístupových práv a trestů</div>
+          </div>
+          <button class="btn btn-primary" onclick="openModal('modal-add-player')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Přidat hráče na Whitelist / Ban
+          </button>
+        </div>
+
+        <!-- Player Tabs -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+          <button class="btn btn-secondary active-tab" id="tab-btn-online" onclick="switchPlayerTab('online')">🟢 Online hráči (<span id="count-online-tab">4</span>)</button>
+          <button class="btn btn-secondary" id="tab-btn-whitelist" onclick="switchPlayerTab('whitelist')">📋 Whitelist (<span id="count-whitelist-tab">6</span>)</button>
+          <button class="btn btn-secondary" id="tab-btn-banlist" onclick="switchPlayerTab('banlist')">🚫 Banlist (<span id="count-banlist-tab">2</span>)</button>
+        </div>
+
+        <!-- Online Players Tab Content -->
+        <div class="card" id="players-table-container">
+          <div class="schedule-table-wrap">
+            <table id="table-players">
+              <thead>
+                <tr>
+                  <th>Hráč</th>
+                  <th>IP Adresa</th>
+                  <th>Ping</th>
+                  <th>Role</th>
+                  <th>Připojen od</th>
+                  <th style="text-align: right;">Akce</th>
+                </tr>
+              </thead>
+              <tbody id="online-players-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Whitelist Tab Content -->
+        <div class="card" id="whitelist-table-container" style="display: none;">
+          <div class="schedule-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Herní jméno</th>
+                  <th>Datum přidání</th>
+                  <th>Přidal</th>
+                  <th style="text-align: right;">Akce</th>
+                </tr>
+              </thead>
+              <tbody id="whitelist-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Banlist Tab Content -->
+        <div class="card" id="banlist-table-container" style="display: none;">
+          <div class="schedule-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Zabanovaný hráč</th>
+                  <th>Důvod banu</th>
+                  <th>Datum</th>
+                  <th>Uděleno kým</th>
+                  <th style="text-align: right;">Akce</th>
+                </tr>
+              </thead>
+              <tbody id="banlist-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 5: CONFIGURATION ==================== -->
+      <section class="view-section" id="view-config">
+        <div class="section-header">
+          <div>
+            <h2>⚙️ Konfigurace serveru (server.properties)</h2>
+            <div class="section-subtitle">Nastavení herních parametrů, verze a serverových jader</div>
+          </div>
+          <button class="btn btn-primary" id="btn-save-config">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+            Uložit nastavení
+          </button>
+        </div>
+
+        <div class="two-col-grid">
+          <div class="card">
+            <div class="card-title">Základní herní parametry</div>
+            <form id="form-config">
+              <div class="form-group">
+                <label class="form-label" for="cfg-motd">Popis serveru (MOTD)</label>
+                <input type="text" class="form-control" id="cfg-motd" value="Vítejte na BlockHost Minecraft Serveru!">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfg-name">Název serveru v panelu</label>
+                  <input type="text" class="form-control" id="cfg-name" value="BlockHost SMP">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfg-core">Serverové jádro & Verze</label>
+                  <select class="form-control" id="cfg-core">
+                    <option value="Paper 1.20.4" selected>Paper 1.20.4 (Doporučeno)</option>
+                    <option value="Purpur 1.20.4">Purpur 1.20.4 (Vysoký výkon)</option>
+                    <option value="Fabric 1.20.4">Fabric 1.20.4 (Módy)</option>
+                    <option value="Spigot 1.20.4">Spigot 1.20.4</option>
+                    <option value="Vanilla 1.20.4">Vanilla 1.20.4</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfg-gamemode">Výchozí herní mód</label>
+                  <select class="form-control" id="cfg-gamemode">
+                    <option value="survival" selected>Survival (Přežití)</option>
+                    <option value="creative">Creative (Tvořivý)</option>
+                    <option value="adventure">Adventure (Dobrodružný)</option>
+                    <option value="spectator">Spectator (Divák)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfg-difficulty">Obtížnost</label>
+                  <select class="form-control" id="cfg-difficulty">
+                    <option value="peaceful">Peaceful (Mírumilovná)</option>
+                    <option value="easy">Easy (Snadná)</option>
+                    <option value="normal" selected>Normal (Normální)</option>
+                    <option value="hard">Hard (Těžká)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfg-max-players">Maximální počet hráčů</label>
+                  <input type="number" class="form-control" id="cfg-max-players" value="40" min="1" max="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfg-port">Port serveru</label>
+                  <input type="number" class="form-control" id="cfg-port" value="25565" min="1024" max="65535">
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-top: 10px;">
+                <label class="switch-label">
+                  <span>Povolit PvP (souboje hráčů)</span>
+                  <input type="checkbox" id="cfg-pvp" checked>
+                </label>
+                <label class="switch-label">
+                  <span>Vyžadovat Whitelist</span>
+                  <input type="checkbox" id="cfg-whitelist" checked>
+                </label>
+              </div>
+            </form>
+          </div>
+
+          <!-- Raw Configuration Preview -->
+          <div class="card">
+            <div class="card-title">
+              <span>Náhled server.properties</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Generováno z formuláře</span>
+            </div>
+            <pre id="raw-config-preview" style="background: var(--bg-input); padding: 14px; border-radius: 8px; font-family: monospace; font-size: 0.78rem; height: 350px; overflow-y: auto; color: #a5b4fc; border: 1px solid var(--border-color);"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 6: BACKUPS ==================== -->
+      <section class="view-section" id="view-backups">
+        <div class="section-header">
+          <div>
+            <h2>💾 Zálohování a obnova dat</h2>
+            <div class="section-subtitle">Správa archivů světů a konfigurací s obnovou na jedno kliknutí</div>
+          </div>
+          <button class="btn btn-primary" id="btn-create-backup">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline></svg>
+            Vytvořit zálohu nyní
+          </button>
+        </div>
+
+        <div id="backup-progress-card" class="card" style="display: none; margin-bottom: 20px; border-color: var(--accent-green);">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <strong style="color: var(--accent-green);">Vytvářím zálohu serveru...</strong>
+            <span id="backup-progress-text">45%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-bar" id="backup-progress-bar" style="width: 45%;"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="schedule-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Název zálohy</th>
+                  <th>Datum a čas</th>
+                  <th>Velikost</th>
+                  <th>Typ</th>
+                  <th style="text-align: right;">Akce</th>
+                </tr>
+              </thead>
+              <tbody id="backups-tbody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 7: CONSOLE ==================== -->
+      <section class="view-section" id="view-console">
+        <div class="section-header">
+          <div>
+            <h2>💻 Interaktivní webová konzole (RCON)</h2>
+            <div class="section-subtitle">Přímé řízení herního procesu a diagnostika v reálném čase</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="sendConsoleCommand('help')">help</button>
+            <button class="btn btn-secondary btn-sm" onclick="sendConsoleCommand('tps')">tps</button>
+            <button class="btn btn-secondary btn-sm" onclick="sendConsoleCommand('list')">list</button>
+            <button class="btn btn-secondary btn-sm" onclick="clearConsole()">Vymazat konzoli</button>
+          </div>
+        </div>
+
+        <div class="terminal-window">
+          <div class="terminal-header">
+            <div class="terminal-controls">
+              <span class="terminal-dot" style="background-color: #ef4444;"></span>
+              <span class="terminal-dot" style="background-color: #f59e0b;"></span>
+              <span class="terminal-dot" style="background-color: #10b981;"></span>
+            </div>
+            <span>blockhost-server-console (UTF-8)</span>
+            <span id="console-status-indicator" style="color: var(--accent-green);">● Připojeno (RCON)</span>
+          </div>
+          <div class="terminal-logs" id="terminal-logs-container">
+            <!-- Simulated logs stream here -->
+          </div>
+          <form class="terminal-input-bar" id="console-form">
+            <span class="terminal-prompt">&gt;</span>
+            <input type="text" class="terminal-input" id="console-input" placeholder="Zadejte příkaz (např. 'say Ahoj', 'help', 'tps', 'op Dan', 'backup')..." autocomplete="off">
+            <button type="submit" class="btn btn-primary btn-sm">Odeslat</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal: Create Custom Profile -->
+  <div class="modal-overlay" id="modal-create-profile">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Vytvořit vlastní výkonový profil</div>
+        <button class="modal-close" onclick="closeModal('modal-create-profile')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="new-profile-name">Název profilu</label>
+          <input type="text" class="form-control" id="new-profile-name" placeholder="např. Noční Mini, Hardcore Boost">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="new-profile-desc">Popis</label>
+          <input type="text" class="form-control" id="new-profile-desc" placeholder="K čemu je profil určen">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="new-profile-ram">Alokovaná RAM (GB)</label>
+            <input type="number" class="form-control" id="new-profile-ram" min="1" max="64" value="4">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="new-profile-vcpu">vCPU Jádra</label>
+            <input type="number" class="form-control" id="new-profile-vcpu" min="1" max="16" value="2">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="new-profile-price">Hodinová cena (Kč / hod)</label>
+          <input type="number" class="form-control" id="new-profile-price" min="5" max="500" value="35">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-create-profile')">Zrušit</button>
+        <button class="btn btn-primary" id="btn-save-new-profile">Uložit profil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Launch Event -->
+  <div class="modal-overlay" id="modal-event">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Spustit dočasný event (Event Booster)</div>
+        <button class="modal-close" onclick="closeModal('modal-event')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="event-input-name">Název herní události</label>
+          <input type="text" class="form-control" id="event-input-name" value="Sobotní BedWars Turnaj">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="event-select-profile">Cílový vysokovýkonový profil</label>
+          <select class="form-control" id="event-select-profile">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="event-duration">Doba trvání eventu</label>
+          <select class="form-control" id="event-duration">
+            <option value="1">1 minuta (Rychlý demo test)</option>
+            <option value="30">30 minut</option>
+            <option value="60">1 hodina</option>
+            <option value="120" selected>2 hodiny</option>
+            <option value="240">4 hodiny</option>
+          </select>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+            Po vypršení limitu se server automaticky a bezpečně vrátí na standardní profil.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-event')">Zrušit</button>
+        <button class="btn btn-warning" id="btn-confirm-launch-event">⚡ Aktivovat event nyní</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Schedule Rule -->
+  <div class="modal-overlay" id="modal-add-schedule">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Přidat pravidlo plánovače</div>
+        <button class="modal-close" onclick="closeModal('modal-add-schedule')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="sch-rule-name">Název pravidla</label>
+          <input type="text" class="form-control" id="sch-rule-name" placeholder="např. Noční útlum spotřeby">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="sch-rule-profile">Přepnout na profil</label>
+          <select class="form-control" id="sch-rule-profile">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="sch-rule-time">Čas aktivace (HH:MM)</label>
+          <input type="time" class="form-control" id="sch-rule-time" value="01:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dny v týdnu</label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <label><input type="checkbox" name="sch-day" value="Po" checked> Po</label>
+            <label><input type="checkbox" name="sch-day" value="Út" checked> Út</label>
+            <label><input type="checkbox" name="sch-day" value="St" checked> St</label>
+            <label><input type="checkbox" name="sch-day" value="Čt" checked> Čt</label>
+            <label><input type="checkbox" name="sch-day" value="Pá" checked> Pá</label>
+            <label><input type="checkbox" name="sch-day" value="So"> So</label>
+            <label><input type="checkbox" name="sch-day" value="Ne"> Ne</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-schedule')">Zrušit</button>
+        <button class="btn btn-primary" id="btn-save-schedule">Přidat pravidlo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Player / Whitelist / Ban -->
+  <div class="modal-overlay" id="modal-add-player">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Přidat hráče do systému</div>
+        <button class="modal-close" onclick="closeModal('modal-add-player')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="player-add-name">Herní přezdívka (Minecraft Nick)</label>
+          <input type="text" class="form-control" id="player-add-name" placeholder="např. Notch, AlexCZ">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="player-add-action">Požadovaná akce</label>
+          <select class="form-control" id="player-add-action">
+            <option value="whitelist">Přidat na Whitelist (Povolit vstup)</option>
+            <option value="ban">Zabanovat hráče (Ban)</option>
+            <option value="simulate_join">Simulovat připojení na server</option>
+          </select>
+        </div>
+        <div class="form-group" id="ban-reason-group" style="display: none;">
+          <label class="form-label" for="player-add-reason">Důvod banu</label>
+          <input type="text" class="form-control" id="player-add-reason" value="Porušení pravidel serveru">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-player')">Zrušit</button>
+        <button class="btn btn-primary" id="btn-confirm-add-player">Provést akci</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirm Restore Backup -->
+  <div class="modal-overlay" id="modal-restore-backup">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Potvrdit obnovu zálohy</div>
+        <button class="modal-close" onclick="closeModal('modal-restore-backup')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--accent-red); margin-bottom: 12px; font-weight: 600;">
+          ⚠️ Varování: Obnova zálohy přepíše aktuální stav světa a konfiguraci!
+        </p>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;" id="restore-backup-desc">
+          Opravdu si přejete obnovit server z vybrané zálohy? Server bude během procesu automaticky restartován.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-restore-backup')">Zrušit</button>
+        <button class="btn btn-danger" id="btn-confirm-restore">Obnovit a restartovat server</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Toast Notifications Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Main JavaScript Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

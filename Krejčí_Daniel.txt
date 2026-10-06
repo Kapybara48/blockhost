@@ -1,0 +1,4 @@
+Aplikace pro správu Minecraft serverů (BlockHost)
+
+Aplikace bude sloužit ke správě Minecraft serverů, jejich konfigurace, hráčů a záloh.
+Uživatelé budou moci vytvářet výkonové profily serverů s různými cenami, plánovat jejich automatické přepínání podle času a vytvářet dočasné profily pro herní eventy.
