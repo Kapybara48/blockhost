@@ -6,6 +6,7 @@
 >
 > - **DO NOT USE** this project in production or real-world environments.
 > - **DO NOT DEPLOY** or rely on this code for managing active servers or sensitive data.
+> - **1000% vibe coded** ✨ — enter at your own risk.
 > - It is provided as-is without any warranties, maintenance, guarantees, or security auditing.
 
 ---
@@ -26,9 +27,10 @@
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack & Methodology
 
 - **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **Methodology:** 1000% vibe coded ✨
 - **Purpose:** Educational prototype / UI demo
 
 ---
